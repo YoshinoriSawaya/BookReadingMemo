@@ -1,0 +1,26 @@
+.common-button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    color: white;
+    /* ダークモード基準 */
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+.common-button:hover {
+    border-color: var(--accent-color);
+    /* index.cssの変数を使用 */
+}
+
+/* 以前の index.css にあったライトモード設定もパーツ側に持ってくる */
+@media (prefers-color-scheme: light) {
+    .common-button {
+        background-color: #f9f9f9;
+        color: #213547;
+    }
+}

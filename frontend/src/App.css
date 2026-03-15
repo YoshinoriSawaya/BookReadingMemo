@@ -1,0 +1,139 @@
+/* 1. 基本レイアウト：画面全体を固定 */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  /* ブラウザ全体のスクロールを禁止 */
+  background-color: #1a1a1a;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 2. メインレイアウト：ヘッダー以外の残り全域 */
+.app-main-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding: 20px;
+  overflow: hidden;
+  /* 子要素のスクロールバーを独立させる */
+  transition: grid-template-columns 0.3s ease;
+}
+
+/* 詳細表示時のグリッド比率 */
+.app-main-layout.has-detail {
+  grid-template-columns: 320px 1fr;
+}
+
+/* 3. 左側：本棚エリア */
+.book-grid-container {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  align-content: start;
+}
+
+/* 詳細表示時は本を縦一列にする */
+.has-detail .book-grid {
+  grid-template-columns: 1fr;
+}
+
+/* 4. カードのデザイン */
+.book-card-wrapper {
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s;
+  overflow: hidden;
+  scroll-margin-top: 20px;
+  /* スクロール停止位置の余白 */
+}
+
+.book-card-wrapper:hover {
+  transform: translateY(-4px);
+  border-color: #444;
+}
+
+.book-card-wrapper.active {
+  border-color: #646cff;
+  box-shadow: 0 0 15px rgba(100, 108, 255, 0.3);
+}
+
+/* 5. 右側：詳細エリア */
+.book-detail-aside {
+  height: 100%;
+  background-color: #252525;
+  border-radius: 12px;
+  padding: 20px;
+  overflow-y: auto;
+  border: 1px solid #333;
+  position: relative;
+  /* 子の絶対配置の起点 */
+}
+
+.close-detail-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.close-detail-btn:hover {
+  color: #fff;
+}
+
+/* 6. スクロールバーのカスタマイズ */
+.book-grid-container::-webkit-scrollbar,
+.book-detail-aside::-webkit-scrollbar {
+  width: 6px;
+}
+
+.book-grid-container::-webkit-scrollbar-thumb,
+.book-detail-aside::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
+
+/* 1. 詳細が開いている時の、全カードのデフォルト状態を少し暗くする */
+.has-detail .book-card-wrapper {
+  opacity: 0.4;
+  /* 暗く（透明に）する */
+  filter: grayscale(0.5);
+  /* 彩度を少し落とすとより目立ちます */
+  transition: all 0.3s ease;
+}
+
+/* 2. 選択されているカード（active）だけは、明るさを維持する */
+.has-detail .book-card-wrapper.active {
+  opacity: 1;
+  filter: grayscale(0);
+  transform: scale(1.02);
+  /* ほんの少し大きくすると「選んでいる感」が出ます */
+  box-shadow: 0 0 20px rgba(100, 108, 255, 0.4);
+  /* 発光を強調 */
+  border-color: #646cff;
+}
+
+/* 3. ホバーした時は少しだけ明るくして、選べることを伝える */
+.has-detail .book-card-wrapper:hover {
+  opacity: 0.7;
+}

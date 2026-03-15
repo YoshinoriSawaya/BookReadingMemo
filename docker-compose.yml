@@ -1,0 +1,24 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-reading-app
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourPassword123!
+    volumes:
+      - sql-data:/var/opt/mssql
+
+volumes:
+  sql-data:
+    #volumes: これが重要です！これがないと、Dockerを止めるたびにDBに保存したデータ（本やメモ）が消えてしまいます。
+    #         sql-data という領域を確保して、データを永続化しています。
+    #container_name: 自由に変えられますが、プロジェクト名を入れると分かりやすくなります。
+
+    # 起動
+    # docker-compose up -d
+    # 停止
+    # docker-compose stop
+    # 完全に削除
+    # docker-compose down

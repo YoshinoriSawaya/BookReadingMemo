@@ -1,0 +1,148 @@
+.quote-section-container {
+    margin-top: 15px;
+}
+
+.quote-section-title {
+    color: #fff;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.quote-form {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quote-textarea {
+    width: 100%;
+    min-height: 80px;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.quote-form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.quote-page-input {
+    width: 100px !important;
+}
+
+.quote-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.quote-item {
+    background-color: #252525;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color, #1976d2);
+    transition: transform 0.1s;
+}
+
+.quote-content {
+    color: #ddd;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.quote-page-tag {
+    display: block;
+    color: #666;
+    font-size: 0.75rem;
+    text-align: right;
+    margin-top: 6px;
+}
+
+.quote-thought-area {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #333;
+}
+
+.quote-form {
+    display: grid;
+    /* 2列構成：ページ数入力欄は左、ボタンは右 */
+    grid-template-columns: 100px 1fr;
+    gap: 12px;
+    background-color: #252525;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+/* ページ数入力欄：左上 */
+.quote-page-input {
+    grid-column: 1;
+    grid-row: 1;
+    height: 36px;
+}
+
+/* テキストエリア：真ん中（全幅） */
+.quote-textarea {
+    grid-column: 1 / span 2;
+    /* 2列分つなげて全幅にする */
+    grid-row: 2;
+    min-height: 100px;
+    resize: vertical;
+    padding: 12px;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    /* はみ出し防止 */
+}
+
+/* 保存ボタン：右下 */
+.quote-form .common-button {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: end;
+    /* 右側に寄せる */
+
+    /* 他のボタンとサイズを統一 */
+    height: 33px;
+    min-width: 70px;
+}
+
+.ocr-upload-area {
+    margin-bottom: 12px;
+}
+
+.ocr-btn {
+    width: 100%;
+    background-color: #333;
+    border: 1px dashed #646cff;
+    /* OCR らしさを出す点線 */
+    font-size: 0.85rem;
+    height: 36px;
+    /* 他のボタンと高さを統一 */
+    transition: all 0.2s ease;
+}
+
+.ocr-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: #888;
+}
+
+/* フォームの調整（先ほどの Grid 設定） */
+.quote-form {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 12px;
+}

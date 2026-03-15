@@ -1,0 +1,16 @@
+[package]
+name = "rust-ocr"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "rust_ocr_horiz"
+path = "src/bin/horiz.rs"  # 実際のファイル場所と一致しているか確認
+
+[[bin]]
+name = "rust_ocr_vert"
+path = "src/bin/vert.rs"   # 実際のファイル場所と一致しているか確認
+
+
+[dependencies]
+tesseract = "0.12"
