@@ -1,9 +1,7 @@
+（※冒頭部分の修正）
 # Book Reading API
-
 本プロジェクトは、書籍の読書記録、引用（Quote）、思考・メモ（Thought）を管理するための Web API です。
-現在個人で開発を進めていますが、**将来的なチーム開発へのスケールアップ**や、**オープンソースとしての貢献（PR）**を前提としたアーキテクチャを採用しています。
-
-「システム全体を深く理解していなくても、対象の機能（Feature）フォルダを見るだけで軽微な修正や機能追加が安全に行える」ことを目指し、初学者の方でも参加しやすい Predictable（予測可能）な設計を心がけています。
+現在は個人で開発を進めていますが、**将来的なチーム開発へのスケールアップ**や、**新しいメンバー（初学者）のオンボーディング**を想定したアーキテクチャを採用しています。
 
 ## アーキテクチャの概要
 
@@ -19,8 +17,42 @@
 
 ## ディレクトリ構成と役割
 
-プロジェクトの主要なディレクトリ構造とその役割は以下の通りです。
+プロジェクトの全体像が直感的に把握できるよう、主要なディレクトリとファイルのみを抜粋した構成図です。
 
+```text
+BookReadingApi/
+│  Program.cs                // アプリケーションのエントリポイント・DI等の設定
+│  appsettings.json          // アプリケーション環境設定
+│
+├─ Core/                     // システム全体で共有する基盤コード
+│  ├─ Constants/             // 定数クラス
+│  ├─ Entities/              // 共通の基底クラス (BaseEntity.cs など)
+│  ├─ Enums/                 // 列挙型
+│  └─ Exceptions/            // カスタム例外
+│
+├─ Data/                     // インフラストラクチャ層
+│  └─ AppDbContext.cs        // EF Core データベースコンテキスト
+│
+└─ Features/                 // 機能（ドメイン）ごとの垂直スライス
+   │
+   ├─ Book/                  // 【例】複雑なビジネスロジックを持つ機能
+   │  ├─ Controllers/        // BooksController.cs
+   │  ├─ DTOs/               // BookRequest.cs, BookResponse.cs
+   │  ├─ Entities/           // Book.cs, Author.cs
+   │  ├─ Repositories/       // IBookRepository.cs, BookRepository.cs
+   │  └─ UseCase/            // IBookUseCase.cs, BookUseCase.cs
+   │
+   ├─ Quote/                 // 引用関連機能
+   │
+   ├─ Thought/               // 【例】シンプルなCRUD構成の機能
+   │  ├─ Controllers/        // ThoughtsController.cs
+   │  ├─ DTOs/               // ThoughtDTOs.cs
+   │  ├─ Entities/           // ThoughtRecord.cs
+   │  └─ Repositories/       // IThoughtRepository.cs, ThoughtRepository.cs
+   │                           // ※単純な機能のため UseCase は意図的に省略
+   │
+   └─ User/                  // ユーザー関連機能
+```
 ### 1. `Features/` (中核機能)
 アプリケーションの各機能（ドメイン）ごとにフォルダを分割しています。新しい機能を追加する場合は、この配下に新しいフォルダを作成し、その中で実装を完結させます。
 
@@ -110,3 +142,16 @@
 * **Entityのサフィックス（接尾辞）:**
   * システムが提供する共通のマスターデータにはサフィックスを付けません（例: `Book`, `User`, `MasterTag`）。
   * ユーザーが自身の操作で生成するトランザクションデータ（記録）には `Record` を付け、視覚的に区別します（例: `ThoughtRecord`, `QuoteRecord`）。
+
+
+---
+## 🚀 今後のTODO (Future Work)
+
+本プロジェクトのアーキテクチャ（依存性逆転の原則とDIの徹底）の恩恵を活かし、以下の順序でテストコードの拡充を予定しています。
+
+* **UseCase の単体テスト（Unit Test）**
+  * `Moq` 等を利用して Repository のインターフェースをモック化し、データベースに依存せずにビジネスロジックの振る舞いを高速に検証します。
+* **Controller の統合テスト（Integration Test）**
+  * `WebApplicationFactory` を使用し、エンドポイントの入出力（DTOのシリアライズ・HTTPステータスコード）が仕様通りに機能するかを検証します。特に UseCase を省略しているシンプルなCRUD機能（Thought機能など）の品質担保に活用します。
+* **ドキュメント生成の自動化**
+  * SwaggerでのAPI仕様は書けているが、テストコードからドキュメントを生成し、別軸から参照出来るようにしたい。 
