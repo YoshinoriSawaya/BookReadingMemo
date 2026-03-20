@@ -10,6 +10,8 @@ using BookReading.Api.Features.Quotes.Repositories;
 using BookReading.Api.Features.Users.Repositories;
 using System.Text.Json.Serialization;
 
+using Scalar.AspNetCore; // 👈 これを追加！
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ============================================================
@@ -79,8 +81,15 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(options =>
+    {
+        options.RouteTemplate = "openapi/{documentName}.json";
+    });
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "Book Reading API v1");
+    });
+    app.MapScalarApiReference();
 }
 
 app.UseRouting();
