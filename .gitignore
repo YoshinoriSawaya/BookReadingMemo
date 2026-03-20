@@ -1,0 +1,34 @@
+# --- Security ---
+.env
+.env.*
+# サンプルファイルだけは許可する場合
+!.env.example
+
+# --- .NET (C#) ---
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+
+# --- Node.js (Frontend) ---
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+.next/
+
+# --- Docker & DB ---
+# もしボリュームをローカルフォルダにマウントしている場合は除外
+pg-data/
+sql-data/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+_backup/

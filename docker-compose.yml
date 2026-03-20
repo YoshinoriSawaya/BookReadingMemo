@@ -1,17 +1,21 @@
 services:
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver-reading-app
-    ports:
-      - "1433:1433"
+    image: postgres:16-alpine
+    container_name: postgres-reading-app
+    restart: always
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourPassword123!
+      # .env から値を読み込みます
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
     volumes:
-      - sql-data:/var/opt/mssql
+      # PostgreSQLのデータ永続化パスはここです
+      - pg-data:/var/lib/postgresql/data
 
 volumes:
-  sql-data:
+  pg-data:
     #volumes: これが重要です！これがないと、Dockerを止めるたびにDBに保存したデータ（本やメモ）が消えてしまいます。
     #         sql-data という領域を確保して、データを永続化しています。
     #container_name: 自由に変えられますが、プロジェクト名を入れると分かりやすくなります。
