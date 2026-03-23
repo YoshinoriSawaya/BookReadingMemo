@@ -1,0 +1,1 @@
+E:\Engineering\Server\book-reading-memo\packages\ocr-preprocessor\target\wasm32-unknown-unknown\release\ocr_preprocessor.wasm: E:\Engineering\Server\book-reading-memo\packages\ocr-preprocessor\src\lib.rs

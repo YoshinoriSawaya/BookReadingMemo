@@ -12,8 +12,10 @@
   "dependencies": {
     "axios": "^1.13.6",
     "html5-qrcode": "^2.3.8",
+    "ocr-preprocessor": "file:../../packages/ocr-preprocessor/pkg",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-rnd": "^10.5.3",
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
