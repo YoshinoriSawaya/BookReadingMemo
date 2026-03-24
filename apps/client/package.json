@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@zxing/library": "^0.21.3",
     "axios": "^1.13.6",
     "html5-qrcode": "^2.3.8",
     "ocr-preprocessor": "file:../../packages/ocr-preprocessor/pkg",

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import client from '../../../../api/client';
 import { type Quote } from '../../schemas/quote';
@@ -8,15 +6,11 @@ import { ThoughtSection } from '../../../thought/components/ThoughtSection';
 
 import { Button } from "../../../../shared/ui/button";
 import { Input } from "../../../../shared/ui/input";
-import { Modal } from "../../../../shared/ui/modal/Modal"; // 🌟 これを追加
+// 🌟 Modalのインポートは不要になるので削除します
+// import { Modal } from "../../../../shared/ui/modal/Modal"; 
 
 import { ImageProcessor } from '../ocr/ImageProcessor';
-// 🌟 1. 作成した OcrScanner をインポート
-
 import { OcrScanner } from '../ocr/OcrScanner';
-
-// // 1. Wasmの初期化関数(default)と、作った関数(greet)をインポート
-// import initWasm, { greet } from 'ocr-preprocessor';
 
 import "../../style.css";
 
@@ -30,9 +24,7 @@ export const QuoteSection = ({ bookId, masterTags, userTags }: Props) => {
     const [quotes, setQuotes] = useState<Quote[]>([]);
     const [newText, setNewText] = useState('');
     const [page, setPage] = useState<number | ''>('');
-    const [isOcrLoading, setIsOcrLoading] = useState(false); // OCR状態管理
-
-    // 🌟 2. スキャナーの表示状態を管理するStateを追加
+    const [isOcrLoading, setIsOcrLoading] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,15 +35,10 @@ export const QuoteSection = ({ bookId, masterTags, userTags }: Props) => {
 
         setIsOcrLoading(true);
         try {
-            // 1. フロントエンド(TS)で画像をプリプロセッシング
             const processedBase64 = await ImageProcessor.processForOcr(file);
-
-            // 2. C# の API へ送信（以前あなたが構築した client を利用）
-            // backend ではこの Base64 を受け取って Rust を叩く
             const response = await client.post<{ text: string }>('Ocr/process', {
                 base64Image: processedBase64.split(',')[1]
             });
-
             setNewText(prev => (prev ? `${prev}\n${response.data.text}` : response.data.text));
         } catch (err) {
             console.error("OCR連携失敗:", err);
@@ -90,27 +77,22 @@ export const QuoteSection = ({ bookId, masterTags, userTags }: Props) => {
         }
     };
 
-    // // 2. 初回マウント時にWasmを非同期でロードする
-    // useEffect(() => {
-    //     const loadWasm = async () => {
-    //         try {
-    //             // Wasmモジュールをブラウザのメモリに読み込む
-    //             await initWasm();
-
-    //             // Rustの関数を呼んでみる！
-    //             console.log("🦀 Rustからのお告げ: ", greet());
-    //         } catch (err) {
-    //             console.error("Wasmの初期化に失敗しました:", err);
-    //         }
-    //     };
-
-    //     loadWasm();
-    // }, []); // 依存配列は空にして初回のみ実行
-
-
     return (
         <div className="quote-section-container">
             <h5 className="quote-section-title">引用メモ</h5>
+
+            {/* 🌟 1. Modalから出し、引用エリアの最上部にインライン配置 */}
+            {isScanning && (
+                <div className="ocr-scanner-inline-wrapper" style={{ marginBottom: '20px' }}>
+                    <OcrScanner
+                        onDetected={(text) => {
+                            setNewText(prev => prev ? `${prev}\n${text}` : text);
+                            setIsScanning(false);
+                        }}
+                        onClose={() => setIsScanning(false)}
+                    />
+                </div>
+            )}
 
             {/* 🌟 元のUIを常に表示する（三項演算子で隠さない） */}
             <div className="ocr-upload-area" style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
@@ -130,11 +112,11 @@ export const QuoteSection = ({ bookId, masterTags, userTags }: Props) => {
                     {isOcrLoading ? '読み取り中...' : '📁 画像から'}
                 </Button>
 
-                {/* 📷 カメラ起動ボタン */}
                 <Button
                     type="button"
                     variant="primary"
                     onClick={() => setIsScanning(true)}
+                    disabled={isScanning} // 🌟 スキャン中はボタンを押せなくしておくと親切です
                 >
                     📷 カメラでリアルタイム読取
                 </Button>
@@ -159,6 +141,7 @@ export const QuoteSection = ({ bookId, masterTags, userTags }: Props) => {
                     保存
                 </Button>
             </form>
+
             {/* 一覧表示 */}
             <div className="quote-list">
                 {quotes.map((q) => (
@@ -170,7 +153,6 @@ export const QuoteSection = ({ bookId, masterTags, userTags }: Props) => {
                             )}
                         </div>
 
-                        {/* 引用に紐づく感想セクション */}
                         <div className="quote-thought-area">
                             <ThoughtSection
                                 bookId={bookId}
@@ -182,23 +164,8 @@ export const QuoteSection = ({ bookId, masterTags, userTags }: Props) => {
                     </div>
                 ))}
             </div>
-            {/* ========================================= */}
-            {/* 🌟 共通の Modal コンポーネントを使って表示 */}
-            {/* ========================================= */}
-            <Modal
-                isOpen={isScanning}
-                onClose={() => setIsScanning(false)}
-                title="カメラでテキストを読み取る"
-            >
-                {/* Modalの中身として OcrScanner を渡す */}
-                <OcrScanner
-                    onDetected={(text) => {
-                        setNewText(prev => prev ? `${prev}\n${text}` : text);
-                        setIsScanning(false);
-                    }}
-                    onClose={() => setIsScanning(false)}
-                />
-            </Modal>
+
+            {/* 🌟 下にあった <Modal> ブロックはすべて削除 */}
         </div>
     );
 };

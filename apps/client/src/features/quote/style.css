@@ -146,3 +146,202 @@
     grid-template-columns: 100px 1fr;
     gap: 12px;
 }
+
+/* OcrScanner.css */
+
+.ocr-scanner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 8px;
+}
+
+.ocr-settings-panel {
+    width: 100%;
+    background-color: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ocr-setting-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #4b5563;
+    margin-bottom: 8px;
+}
+
+.ocr-setting-info span:last-child {
+    color: #9ca3af;
+}
+
+.ocr-range-input {
+    width: 100%;
+    height: 8px;
+    background-color: #e5e7eb;
+    border-radius: 8px;
+    appearance: none;
+    cursor: pointer;
+    accent-color: #2563eb;
+}
+
+/* デバッグ用パネル */
+.ocr-debug-panel {
+    width: 100%;
+    background-color: #0f172a;
+    color: #4ade80;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    font-family: monospace;
+    font-size: 0.75rem;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ocr-debug-header {
+    font-weight: bold;
+    color: #cbd5e1;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+}
+
+.ocr-debug-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.ocr-debug-buffer-item {
+    background-color: #1e293b;
+    padding: 6px;
+    border-radius: 4px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 4px;
+}
+
+.ocr-debug-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.ocr-debug-badge.high {
+    background-color: #14532d;
+    color: #86efac;
+}
+
+.ocr-debug-badge.mid {
+    background-color: #713f12;
+    color: #fde047;
+}
+
+.ocr-debug-badge.low {
+    background-color: #7c2d12;
+    color: #fdba74;
+}
+
+/* カメラ・キャンバス周り */
+.ocr-camera-wrapper {
+    position: relative;
+    width: 100%;
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #1f2937;
+}
+
+.ocr-source-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.ocr-corner-marker {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: #4ade80;
+}
+
+.ocr-canvas-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.ocr-process-canvas {
+    display: block;
+    width: 100%;
+    background-color: #111827;
+    margin: 0 auto;
+    image-rendering: pixelated;
+    height: auto;
+    max-height: 300px;
+    object-fit: contain;
+}
+
+/* 結果表示とボタン */
+.ocr-status-badge {
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border-radius: 9999px;
+}
+
+.ocr-status-badge.success {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.ocr-status-badge.processing {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ocr-result-box {
+    width: 100%;
+    background-color: #fff;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    height: 96px;
+    overflow-y: auto;
+    font-size: 0.875rem;
+    color: #1f2937;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    white-space: pre-wrap;
+}
+
+.ocr-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.ocr-actions>button {
+    flex: 1;
+    width: 100%;
+}
