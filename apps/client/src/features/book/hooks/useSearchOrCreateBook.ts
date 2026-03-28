@@ -1,7 +1,6 @@
-// src/features/book/hooks/useCreateBook.ts
 import { useState } from 'react';
 import client from '../../../shared/api/client';
-import type { BookResponse } from '../schemas/book'; // (旧 ../../../types)
+import type { BookResponse } from '../schemas/book';
 
 export const useSearchOrCreateBook = () => {
     const [loading, setLoading] = useState(false);
@@ -19,12 +18,16 @@ export const useSearchOrCreateBook = () => {
                 ccode
             });
             setPreview(res.data);
-        } catch (err: any) {
-            if (err.response?.status === 422) {
-                setError("データベースに該当する本が見つかりませんでした。");
-            } else {
-                setError(`処理中にエラーが発生しました。`);
+        } catch (err: unknown) {
+            // axios等のエラーオブジェクト構造を想定
+            if (typeof err === 'object' && err !== null && 'response' in err) {
+                const axiosError = err as { response?: { status?: number } };
+                if (axiosError.response?.status === 422) {
+                    setError("データベースに該当する本が見つかりませんでした。");
+                    return;
+                }
             }
+            setError("処理中にエラーが発生しました。");
         } finally {
             setLoading(false);
         }

@@ -1,16 +1,20 @@
 import { type BookResponse } from '../../schemas/book';
 import '../../style.css';
 
-export const BookCard = ({ book, isCompact }: { book: BookResponse; isCompact: boolean }) => {
-    const authorNames = book.authors?.length > 0
-        ? book.authors?.map(ba => ba).join(', ')
-        : '著者不明';
+interface Props {
+    book: BookResponse;
+    isCompact?: boolean;
+}
+
+export const BookCard = ({ book, isCompact = false }: Props) => {
+    const authorNames = book.authors?.length > 0 ? book.authors.join(', ') : '著者不明';
+    const secureImageUrl = book.imageUrl?.replace('http://', 'https://');
 
     return (
         <div className={`book-card ${isCompact ? 'compact' : ''}`}>
-            {book.imageUrl && (
+            {secureImageUrl && (
                 <img
-                    src={book.imageUrl.replace('http://', 'https://')}
+                    src={secureImageUrl}
                     className="book-cover"
                     alt={book.title}
                 />
@@ -18,12 +22,8 @@ export const BookCard = ({ book, isCompact }: { book: BookResponse; isCompact: b
 
             {!isCompact && (
                 <div className="book-info">
-                    <div className="book-title">
-                        {book.title}
-                    </div>
-                    <div className="book-author">
-                        {authorNames}
-                    </div>
+                    <div className="book-title">{book.title}</div>
+                    <div className="book-author">{authorNames}</div>
                 </div>
             )}
         </div>
