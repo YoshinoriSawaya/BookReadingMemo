@@ -10,22 +10,23 @@ body {
   font-family: sans-serif;
 }
 
+/* App.tsx側の大枠（おそらく既に似たような記述があるはずです） */
 .app-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* 2. メインレイアウト：ヘッダー以外の残り全域 */
+/* メインレイアウト（修正版） */
 .app-main-layout {
-  flex: 1;
   display: grid;
+  /* ★ flex から grid に変更 */
   grid-template-columns: 1fr;
-  gap: 24px;
-  padding: 20px;
-  overflow: hidden;
-  /* 子要素のスクロールバーを独立させる */
-  transition: grid-template-columns 0.3s ease;
+  /* ★ デフォルトは1カラム（本棚のみ） */
+  flex: 1;
+  /* 親（book-page-container）の余白を埋める */
+  min-height: 0;
+  /* スクロールを効かせるための重要プロパティ */
 }
 
 /* 詳細表示時のグリッド比率 */

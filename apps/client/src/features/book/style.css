@@ -1,3 +1,14 @@
+/* ★ 今回追加した BookPage のコンテナが、親の高さとFlexを引き継ぐようにする */
+.book-page-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    /* 親の余白をすべて埋める */
+    min-height: 0;
+    /* Flexboxの子要素がはみ出すのを防ぐおまじない */
+    width: 100%;
+}
+
 /* =========================================
    Book Detail View
 ========================================= */
