@@ -85,13 +85,20 @@ export const useBarcodeScanner = () => {
     }, []);
 
     const processFrame = useCallback(() => {
-        if (!videoRef.current || !canvasRef.current || !isMounted.current) return;
+        // コンポーネントがアンマウントされていたら完全に止める
+        if (!isMounted.current) return;
+
+        // DOM要素がまだ準備されていない場合は、次のフレームへ回してループを維持する
+        if (!videoRef.current || !canvasRef.current) {
+            requestRef.current = requestAnimationFrame(processFrame);
+            return;
+        }
 
         const video = videoRef.current;
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
 
-        // ビデオの準備ができていない場合はスキップ
+        // ビデオの準備ができていない場合はスキップ（ここも元のコードで対応済みですが一応確認）
         if (video.readyState < VIDEO_READY_STATE_HAVE_CURRENT_DATA || !ctx) {
             requestRef.current = requestAnimationFrame(processFrame);
             return;

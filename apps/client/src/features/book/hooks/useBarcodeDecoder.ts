@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import {
     MultiFormatReader,
     BarcodeFormat,
@@ -19,7 +19,8 @@ export const useBarcodeDecoder = () => {
         codeReaderRef.current = reader;
     }, []);
 
-    const decodeCanvas = (canvas: HTMLCanvasElement): string | null => {
+    // useCallbackでラップする
+    const decodeCanvas = useCallback((canvas: HTMLCanvasElement): string | null => {
         if (!codeReaderRef.current) return null;
         try {
             const luminanceSource = new HTMLCanvasElementLuminanceSource(canvas);
@@ -27,10 +28,9 @@ export const useBarcodeDecoder = () => {
             const result = codeReaderRef.current.decode(bitmap);
             return result.getText();
         } catch (err) {
-            // ZXingは未検出時に例外を投げるためキャッチしてnullを返す
             return null;
         }
-    };
+    }, []);
 
     return { decodeCanvas };
 };

@@ -96,7 +96,9 @@ export const Scanner = ({ onDetected, onClose }: ScannerProps) => {
                 <p className="sub-text">1段目と2段目を順番にスキャンします</p>
             </div>
 
-            {/* sourceCanvasRef (データ取得用) は隠したまま */}
+            {/* 解析用のCanvasをフックに紐付ける (sourceCanvasRefが不要であれば置き換えでOKです) */}
+            <canvas ref={refs.canvasRef} style={{ display: 'none' }} />
+            {/* もし sourceCanvasRef も別の処理で使っているなら両方置いてください */}
             <canvas ref={refs.sourceCanvasRef} style={{ display: 'none' }} />
         </div>
     );

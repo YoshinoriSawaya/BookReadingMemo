@@ -171,9 +171,15 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 
+  /* ↓ここから今回追加する分↓ */
+  .book-grid-container {
+    scroll-padding-top: 16px;
+  }
+
   /* 4. 詳細エリア：スマホでは一覧の上に覆い被せる（全画面表示） */
   .book-detail-aside {
     position: absolute;
+    padding-top: 60px;
     top: 0;
     left: 0;
     width: 100%;
