@@ -2,9 +2,9 @@ import { useState } from 'react';
 import client from '../../../api/client';
 import { type UserTag, type MasterTag } from '../../../types';
 
-import { Button } from "../../../shared/ui/button";
-import { Input } from "../../../shared/ui/input";
-import { Select } from "../../../shared/ui/select";
+import { Button } from "../../../shared/ui/button/Button";
+import { Input } from "../../../shared/ui/input/Input";
+import { Select } from "../../../shared/ui/select/Select";
 
 
 // スタイルを外出し

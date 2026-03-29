@@ -359,3 +359,66 @@
     font-size: 10px;
     color: #888;
 }
+
+/* =========================================
+   スマートフォン向けレスポンシブ対応（追加分）
+   画面幅が768px以下の場合に適用されます
+   ========================================= */
+@media (max-width: 768px) {
+
+    /* --- 1. 詳細画面（Book Detail View）の調整 --- */
+    .book-detail-view {
+        /* 画面端にテキストがくっつかないように左右に少し余白を設ける */
+        padding: 0 4px;
+    }
+
+    .detail-header {
+        margin-bottom: 20px;
+        /* PCの30pxから縮小 */
+    }
+
+    .detail-title {
+        font-size: 1.5rem;
+        /* PCの1.8remから少し小さくして改行を減らす */
+    }
+
+    .detail-content-grid {
+        gap: 20px;
+        /* PCの40pxだとスマホでは空きすぎるので半減 */
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        /* PCの1.4remから縮小 */
+        margin-bottom: 12px;
+    }
+
+    /* --- 2. 登録フォーム・プレビューの調整 --- */
+    .preview-info-layout {
+        gap: 10px;
+        /* PCの15pxから縮小 */
+    }
+
+    .preview-cover-img {
+        width: 60px;
+        /* スマホの狭い画面に合わせて少し画像を小さく */
+    }
+
+    .preview-title {
+        font-size: 1rem;
+    }
+
+    /* --- 3. スキャナー（バーコードリーダー）の調整 --- */
+    .scanner-guide-overlay {
+        /* 固定幅（260px）だと小さなスマホで枠がキツキツになるため、相対指定に変更 */
+        width: 80%;
+        max-width: 260px;
+        height: 100px;
+        /* 高さを少し抑えてバーコードに合わせる */
+    }
+
+    .scanner-instructions {
+        padding: 0 8px;
+        /* 左右の余白を少し詰める */
+    }
+}

@@ -1,5 +1,5 @@
 import { Rnd } from 'react-rnd';
-import { Button } from "../../../../shared/ui/button";
+import { Button } from "../../../../shared/ui/button/Button";
 import { useOcrScanner, type BufferItem } from '../../hooks/useOcrScanner';
 import '../../style.css'; // 標準CSSをインポート
 

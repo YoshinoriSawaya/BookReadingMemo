@@ -1,5 +1,12 @@
 /* 1. 基本レイアウト：画面全体を固定 */
-html,
+html {
+  /* ヘッダーの高さ ＋ 少し余白（任意）を指定 */
+  scroll-padding-top: 70px;
+
+  /* スクロールをスムーズにしたい場合はこれもおすすめ */
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   height: 100%;
@@ -137,4 +144,56 @@ body {
 /* 3. ホバーした時は少しだけ明るくして、選べることを伝える */
 .has-detail .book-card-wrapper:hover {
   opacity: 0.7;
+}
+
+/* =========================================
+   スマートフォン向けレスポンシブ対応
+   画面幅が768px以下の場合に適用されます
+   ========================================= */
+@media (max-width: 768px) {
+
+  /* 1. メインレイアウトの変更：2カラムをやめて絶対配置のベースにする */
+  .app-main-layout.has-detail {
+    display: block;
+    position: relative;
+    /* 詳細が開いている時は、裏側の本棚をスクロールさせない */
+    overflow: hidden;
+  }
+
+  /* 2. 本棚のグリッド調整：スマホでは少し小さくして2列並びになりやすくする */
+  .book-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  /* 3. 詳細が開いている時の本棚（PCの「1列にする」設定を打ち消し） */
+  .has-detail .book-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  /* 4. 詳細エリア：スマホでは一覧の上に覆い被せる（全画面表示） */
+  .book-detail-aside {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+    border-radius: 0;
+    /* 角丸をなくして画面にフィット */
+    border: none;
+    box-sizing: border-box;
+    background-color: #252525;
+  }
+
+  /* 5. 閉じるボタンのスマホ最適化（タップ領域を広げて押しやすく） */
+  .close-detail-btn {
+    top: 12px;
+    right: 12px;
+    font-size: 1.5rem;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
+    /* 少し背景をつけて見やすく */
+    border-radius: 50%;
+  }
 }

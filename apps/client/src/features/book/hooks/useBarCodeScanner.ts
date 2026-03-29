@@ -2,9 +2,38 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import initWasm from 'ocr-preprocessor';
 import { useCamera } from './useCamera';
 import { useBarcodeDecoder } from './useBarcodeDecoder';
-// 🌟 インポートを変更
-// import { calculateWaveParams, drawAndCalculateRect, checkMotion, processAndDecodeForPreview } from '../utils/scannerLogic';
-import { processSimple, drawAndCalculateRect } from '../utils/scannerLogic';
+
+// 🌟 設定値（マジックナンバー・マジックストリングをここに集約）
+const SCANNER_CONFIG = {
+    // UI・クロップ初期値
+    DEFAULT_CROP: { width: 300, height: 100, x: 30, y: 150 },
+
+    // デバッグUIの更新間隔（ミリ秒）
+    DEBUG_UI_UPDATE_INTERVAL: 100,
+
+    // 解析解像度とスキャン間隔
+    RESOLUTION_WIDTH: 1280,
+    SCAN_INTERVAL_MS: 200,
+
+    // 探索用パラメータ初期値
+    DEFAULT_PARAMS: { sensitivity: 0.15, windowRatio: 0.15 },
+    DEFAULT_WAVE_PARAMS: { baseS: 0.15, ampS: 0.1, baseW: 0.15, ampW: 0.1 },
+
+    // バーコードのプレフィックス判定用
+    PREFIX_ISBN: '978',
+    PREFIX_CCODE: '19',
+
+    // ステータスメッセージ
+    STATUS: {
+        INIT: '初期化中...',
+        SCANNING: 'スキャン中...',
+        COMPLETE: '読み取り完了',
+        WASM_ERROR: 'WASMモジュールの読み込みに失敗しました',
+    }
+} as const;
+
+// HTMLMediaElement.readyState の定数（2 = HAVE_CURRENT_DATA）
+const VIDEO_READY_STATE_HAVE_CURRENT_DATA = 2;
 
 export const useBarcodeScanner = () => {
     // 外部フック
@@ -15,32 +44,32 @@ export const useBarcodeScanner = () => {
     const sourceCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rndWrapperRef = useRef<HTMLDivElement>(null);
-    // const motionCanvasRef = useRef<HTMLCanvasElement>(document.createElement('canvas'));
     const isScannerRunning = useRef(false);
     const isMounted = useRef(true);
     const requestRef = useRef<number | null>(null);
 
     // 状態管理
-    const [crop, setCrop] = useState({ width: 300, height: 100, x: 30, y: 150 });
+    const [crop, setCrop] = useState(SCANNER_CONFIG.DEFAULT_CROP);
     const cropRef = useRef(crop);
     useEffect(() => { cropRef.current = crop; }, [crop]);
 
     const [scannedData, setScannedData] = useState<{ isbn?: string; ccode?: string }>({});
-    const [status, setStatus] = useState<string>('初期化中...');
+    const [status, setStatus] = useState<string>(SCANNER_CONFIG.STATUS.INIT);
 
     // 探索用パラメータ
-    // const exploreScaleRef = useRef(1.0);
-    // const consecutiveFailuresRef = useRef(0);
-    const currentParamsRef = useRef({ sensitivity: 0.15, windowRatio: 0.15 });
-    const waveParamsRef = useRef({ baseS: 0.15, ampS: 0.1, baseW: 0.15, ampW: 0.1 });
+    const currentParamsRef = useRef({ ...SCANNER_CONFIG.DEFAULT_PARAMS });
+    const waveParamsRef = useRef({ ...SCANNER_CONFIG.DEFAULT_WAVE_PARAMS });
+
     const [displayData, setDisplayData] = useState({
-        params: { sensitivity: 0.15, windowRatio: 0.15 },
-        wave: { baseS: 0.15, ampS: 0.1, baseW: 0.15, ampW: 0.1 }
+        params: { ...SCANNER_CONFIG.DEFAULT_PARAMS },
+        wave: { ...SCANNER_CONFIG.DEFAULT_WAVE_PARAMS }
     });
 
     const displayStatus = scannedData.isbn && scannedData.ccode
-        ? '読み取り完了'
-        : (status !== '初期化中...' && status !== 'スキャン中...' ? status : cameraStatus);
+        ? SCANNER_CONFIG.STATUS.COMPLETE
+        : (status !== SCANNER_CONFIG.STATUS.INIT && status !== SCANNER_CONFIG.STATUS.SCANNING
+            ? status
+            : cameraStatus);
 
     // デバッグUIの更新
     useEffect(() => {
@@ -51,65 +80,9 @@ export const useBarcodeScanner = () => {
                     wave: { ...waveParamsRef.current }
                 });
             }
-        }, 100);
+        }, SCANNER_CONFIG.DEBUG_UI_UPDATE_INTERVAL);
         return () => clearInterval(interval);
     }, []);
-
-    // const processFrame = useCallback(() => {
-    //     if (!videoRef.current || !canvasRef.current || !isMounted.current) return;
-
-    //     const video = videoRef.current;
-    //     const canvas = canvasRef.current;
-    //     const ctx = canvas.getContext('2d');
-
-    //     if (video.readyState < 2 || !ctx) {
-    //         requestRef.current = requestAnimationFrame(processFrame);
-    //         return;
-    //     }
-
-    //     // 🌟 解析解像度の戦略変更
-    //     // PCカメラのボケを補うため、あえて高解像度（カメラの生サイズ）で処理
-    //     const rawW = video.videoWidth;
-    //     const rawH = video.videoHeight;
-
-    //     // 🌟 デジタルズーム効果：中央の60%領域だけを切り出す
-    //     // しょぼいカメラでもバーコードを「大きく」見せるため
-    //     const zoomFactor = 0.6;
-    //     const sw = rawW * zoomFactor;
-    //     const sh = rawH * zoomFactor;
-    //     const sx = (rawW - sw) / 2;
-    //     const sy = (rawH - sh) / 2;
-
-    //     // Canvasは 1280x720 程度の「高密度な」状態に固定
-    //     const targetW = 1280;
-    //     const targetH = Math.round(targetW * (sh / sw));
-
-    //     if (canvas.width !== targetW) {
-    //         canvas.width = targetW;
-    //         canvas.height = targetH;
-    //     }
-
-    //     // 🌟 中央を切り抜いて拡大描画
-    //     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, targetW, targetH);
-
-    //     if (!isScannerRunning.current) {
-    //         isScannerRunning.current = true;
-
-    //         // 解析実行
-    //         const text = decodeCanvas(canvas);
-
-    //         if (text) {
-    //             if (text.startsWith('978')) setScannedData(p => ({ ...p, isbn: text }));
-    //             else if (text.startsWith('19')) setScannedData(p => ({ ...p, ccode: text }));
-    //         }
-
-    //         // PCの負荷を考慮し、解析間隔を 250ms に微調整
-    //         setTimeout(() => { isScannerRunning.current = false; }, 250);
-    //     }
-
-    //     requestRef.current = requestAnimationFrame(processFrame);
-    // }, [decodeCanvas]);
-
 
     const processFrame = useCallback(() => {
         if (!videoRef.current || !canvasRef.current || !isMounted.current) return;
@@ -118,13 +91,14 @@ export const useBarcodeScanner = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
 
-        if (video.readyState < 2 || !ctx) {
+        // ビデオの準備ができていない場合はスキップ
+        if (video.readyState < VIDEO_READY_STATE_HAVE_CURRENT_DATA || !ctx) {
             requestRef.current = requestAnimationFrame(processFrame);
             return;
         }
 
-        // 🌟 解析解像度を決定（1280x720 程度に抑えると解析が速い）
-        const targetW = 1280;
+        // 解析解像度を決定
+        const targetW = SCANNER_CONFIG.RESOLUTION_WIDTH;
         const targetH = (video.videoHeight / video.videoWidth) * targetW;
 
         if (canvas.width !== targetW) {
@@ -139,29 +113,34 @@ export const useBarcodeScanner = () => {
         if (!isScannerRunning.current) {
             isScannerRunning.current = true;
 
-            // ZXingに「画像全体」を渡す
+            // ZXingに画像全体を渡す
             const text = decodeCanvas(canvas);
 
             if (text) {
-                if (text.startsWith('978')) setScannedData(p => ({ ...p, isbn: text }));
-                else if (text.startsWith('19')) setScannedData(p => ({ ...p, ccode: text }));
+                if (text.startsWith(SCANNER_CONFIG.PREFIX_ISBN)) {
+                    setScannedData(p => ({ ...p, isbn: text }));
+                } else if (text.startsWith(SCANNER_CONFIG.PREFIX_CCODE)) {
+                    setScannedData(p => ({ ...p, ccode: text }));
+                }
             }
 
-            // 200ms間隔で解析（CPUに優しい）
-            setTimeout(() => { isScannerRunning.current = false; }, 200);
+            // 指定間隔で解析（CPUに優しい）
+            setTimeout(() => {
+                isScannerRunning.current = false;
+            }, SCANNER_CONFIG.SCAN_INTERVAL_MS);
         }
 
         requestRef.current = requestAnimationFrame(processFrame);
-    }, [decodeCanvas]);
+    }, [decodeCanvas, videoRef]);
 
     // WASM初期化とループ開始
     useEffect(() => {
         isMounted.current = true;
         initWasm().then(() => {
-            setStatus('スキャン中...');
+            setStatus(SCANNER_CONFIG.STATUS.SCANNING);
             requestRef.current = requestAnimationFrame(processFrame);
         }).catch(() => {
-            setStatus('WASMモジュールの読み込みに失敗しました');
+            setStatus(SCANNER_CONFIG.STATUS.WASM_ERROR);
         });
 
         return () => {

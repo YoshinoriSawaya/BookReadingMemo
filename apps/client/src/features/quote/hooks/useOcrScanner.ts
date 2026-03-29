@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import Tesseract from 'tesseract.js';
+import Tesseract, { type Worker } from 'tesseract.js';
 import initWasm, { preprocess_image, check_is_still, find_best_text, calculate_distance } from 'ocr-preprocessor';
 
 export interface BufferItem {
@@ -13,6 +13,9 @@ export const useOcrScanner = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rndWrapperRef = useRef<HTMLDivElement>(null);
     const motionCanvasRef = useRef<HTMLCanvasElement>(document.createElement('canvas'));
+
+    // 🌟 Tesseract Workerを保持するRef
+    const tesseractWorkerRef = useRef<Worker | null>(null);
 
     const isOcrRunning = useRef(false);
     const isMounted = useRef(true);
@@ -42,7 +45,7 @@ export const useOcrScanner = () => {
     });
 
     const [scannedText, setScannedText] = useState<string>('');
-    const [status, setStatus] = useState<string>('カメラを起動中...');
+    const [status, setStatus] = useState<string>('カメラとOCRを起動中...');
 
     // インジケータ同期
     useEffect(() => {
@@ -59,12 +62,48 @@ export const useOcrScanner = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // 🌟 初回マウント時に1回だけWorkerを初期化する
+    useEffect(() => {
+        let isWorkerActive = true;
+
+        const initTesseract = async () => {
+            try {
+                // jpnデータをロード済みのWorkerを作成
+                const worker = await Tesseract.createWorker('jpn');
+                if (isWorkerActive) {
+                    tesseractWorkerRef.current = worker;
+                    console.log("Tesseract Worker initialized.");
+                    setStatus('スキャン準備完了');
+                } else {
+                    await worker.terminate();
+                }
+            } catch (err) {
+                console.error("Tesseract initialization failed", err);
+                if (isMounted.current) setStatus('OCRエンジンの起動に失敗しました');
+            }
+        };
+
+        initTesseract();
+
+        return () => {
+            isWorkerActive = false;
+            // アンマウント時にWorkerを確実に破棄
+            if (tesseractWorkerRef.current) {
+                tesseractWorkerRef.current.terminate();
+            }
+        };
+    }, []);
+
     const runOcr = async (sourceCanvas: HTMLCanvasElement) => {
+        // Workerの準備ができていなければスキップ
+        if (!tesseractWorkerRef.current) return;
+
         isOcrRunning.current = true;
         try {
             if (sourceCanvas.width < 10 || sourceCanvas.height < 10) return;
 
-            const result = await Tesseract.recognize(sourceCanvas, 'jpn');
+            // 🌟 初期化済みのWorkerを使って解析
+            const result = await tesseractWorkerRef.current.recognize(sourceCanvas);
             const text = result.data.text.replace(/\s+/g, '').trim();
             const confidence = result.data.confidence;
 
@@ -80,26 +119,20 @@ export const useOcrScanner = () => {
                 // 🌟 2. ハイブリッド方式のバッファ管理ロジック
                 let isTargetChanged = false;
                 if (textBufferRef.current.length > 0) {
-                    // バッファの最新の文字列と比較
                     const referenceText = textBufferRef.current[0].text;
-                    // Rust (WASM) の関数を呼び出して距離を計算
                     const distance = calculate_distance(text, referenceText);
                     const maxLength = Math.max(text.length, referenceText.length);
 
-                    // 文字列の長さに対して50%以上の変更があれば「カメラが別の行に移動した」と判定
                     if (maxLength > 0 && (distance / maxLength) > 0.5) {
                         isTargetChanged = true;
                     }
                 }
 
                 if (isTargetChanged) {
-                    // カメラが移動した場合はバッファをリセット
                     textBufferRef.current = [{ text, confidence }];
                 } else {
-                    // 同じ行を読んでいる場合は追加
                     let newBuffer = [{ text, confidence }, ...textBufferRef.current];
 
-                    // バッファが上限を超えたら「確信度が一番低いもの」を捨てる
                     if (newBuffer.length > bufferSize) {
                         let minIndex = 0;
                         let minConf = newBuffer[0].confidence;
@@ -117,7 +150,7 @@ export const useOcrScanner = () => {
                 // 🌟 3. Rustの find_best_text で最も妥当な文字列を選択
                 if (textBufferRef.current.length >= minRequired) {
                     const textsOnly = textBufferRef.current.map(b => b.text);
-                    const bestText = find_best_text(textsOnly); // これもRustの処理
+                    const bestText = find_best_text(textsOnly);
 
                     setScannedText(bestText);
                     setStatus(`解析済 (精度: ${Math.round(confidence)}%)`);
@@ -127,21 +160,13 @@ export const useOcrScanner = () => {
                 }
 
             } else if (isMounted.current) {
-                // 🌟 失敗（確信度不足 または テキストなし）の場合
                 consecutiveFailuresRef.current += 1;
 
                 if (consecutiveFailuresRef.current >= 5) {
-                    // 5回連続失敗で感度と範囲を5%広げる (1.05倍)。最大1.0でストップ。
                     exploreScaleRef.current = Math.min(3.0, exploreScaleRef.current * 1.1);
                     bestParamsHistoryRef.current = [];
                     consecutiveFailuresRef.current = 0;
                     setStatus(`自動調整中... (探索範囲拡張 x${exploreScaleRef.current.toFixed(1)})`);
-
-                    // 過去の狭い成功履歴に引っ張られないよう、一度履歴をクリアする
-                    bestParamsHistoryRef.current = [];
-                    consecutiveFailuresRef.current = 0; // カウンターをリセットして再スタート
-
-                    setStatus(`自動調整中... (探索範囲拡張)`);
                 } else {
                     setStatus(`読み取り中 (確信度: ${Math.round(confidence)}%)`);
                 }
@@ -174,7 +199,7 @@ export const useOcrScanner = () => {
         const time = performance.now();
         const history = bestParamsHistoryRef.current;
 
-        let baseS = 0.2; // 基本の初期値に固定
+        let baseS = 0.2;
         let baseW = 0.2;
 
         if (history.length > 0) {
@@ -182,7 +207,6 @@ export const useOcrScanner = () => {
             baseW = history.reduce((sum, p) => sum + p.windowRatio, 0) / history.length;
         }
 
-        // 🌟 ベース値の50%の幅に、探索スケールを掛けて振幅を決定
         let ampS = baseS * 0.5 * exploreScaleRef.current;
         let ampW = baseW * 0.5 * exploreScaleRef.current;
 
@@ -191,7 +215,6 @@ export const useOcrScanner = () => {
             ampW = baseW * 0.1;
         }
 
-        // 🌟 0.01 ～ 1.0 の範囲に収まるようにガードをかける
         const currentS = Math.max(0.01, Math.min(1.0, baseS + ampS * Math.sin(time / 3000)));
         const currentW = Math.max(0.01, Math.min(1.0, baseW + ampW * Math.cos(time / 5000)));
 
@@ -223,12 +246,13 @@ export const useOcrScanner = () => {
         const isStill = check_is_still(new Uint8Array(motionData.data), 25000);
 
         if (!isStill) {
-            if (!isOcrRunning.current) setStatus('カメラを固定してください...');
+            if (!isOcrRunning.current && tesseractWorkerRef.current) setStatus('カメラを固定してください...');
             requestRef.current = requestAnimationFrame(processFrame);
             return;
         }
 
-        if (isStill && !isOcrRunning.current) {
+        // Workerの準備ができている場合のみOCRを走らせる
+        if (isStill && !isOcrRunning.current && tesseractWorkerRef.current) {
             setStatus(status.includes('自動調整') ? status : 'テキストを解析中...');
             const MAX_DIMENSION = 1200;
             const resizeRatio = MAX_DIMENSION / Math.max(rectW, rectH);
@@ -260,9 +284,11 @@ export const useOcrScanner = () => {
         requestRef.current = requestAnimationFrame(processFrame);
     };
 
+    // カメラとWASMの初期化
     useEffect(() => {
         isMounted.current = true;
         let stream: MediaStream | null = null;
+
         const startScanner = async () => {
             try {
                 await initWasm();
@@ -273,7 +299,6 @@ export const useOcrScanner = () => {
                     videoRef.current.srcObject = stream;
                     videoRef.current.onloadedmetadata = () => {
                         videoRef.current?.play();
-                        setStatus('スキャン中...');
                         requestRef.current = requestAnimationFrame(processFrame);
                     };
                 }
@@ -282,6 +307,7 @@ export const useOcrScanner = () => {
             }
         };
         startScanner();
+
         return () => {
             isMounted.current = false;
             if (requestRef.current) cancelAnimationFrame(requestRef.current);

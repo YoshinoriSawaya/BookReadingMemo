@@ -4,8 +4,8 @@ import { type Quote } from '../../schemas/quote';
 import { type MasterTag, type UserTag } from '../../../tag/schemas/tag';
 import { ThoughtSection } from '../../../thought/components/ThoughtSection';
 
-import { Button } from "../../../../shared/ui/button";
-import { Input } from "../../../../shared/ui/input";
+import { Button } from "../../../../shared/ui/button/Button";
+import { Input } from "../../../../shared/ui/input/Input";
 // 🌟 Modalのインポートは不要になるので削除します
 // import { Modal } from "../../../../shared/ui/modal/Modal"; 
 

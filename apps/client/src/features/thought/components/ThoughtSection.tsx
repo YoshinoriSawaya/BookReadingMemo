@@ -8,9 +8,9 @@ import '../style.css';
 // 以前: ../../ui/Button
 // 現在: ../../ui/button/Button (フォルダが一段深くなった)
 
-import { Button } from "../../../shared/ui/button";
-import { Select } from "../../../shared/ui/select";
-import { Input } from "../../../shared/ui/input";
+import { Button } from "../../../shared/ui/button/Button";
+import { Select } from "../../../shared/ui/select/Select";
+import { Input } from "../../../shared/ui/input/Input";
 
 // インポート文の下に追加
 interface Props {

@@ -345,3 +345,66 @@
     flex: 1;
     width: 100%;
 }
+
+/* =========================================
+   スマートフォン向けレスポンシブ対応（第3弾: 引用・OCR）
+   画面幅が768px以下の場合に適用されます
+   ========================================= */
+@media (max-width: 768px) {
+
+    /* --- 1. 引用フォーム（Quote Form）の調整 --- */
+    .quote-form {
+        /* スマホでは複雑なGridをやめて、シンプルな縦積み（Flex）に変更 */
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .quote-page-input {
+        /* ページ入力欄は左上に小さく置くのではなく、タップしやすいように少し広げる */
+        width: 120px !important;
+    }
+
+    .quote-form .common-button {
+        /* 保存ボタンを横幅いっぱいに広げて、親指で押しやすくする */
+        width: 100%;
+        height: 44px;
+        /* タップしやすい高さの基準（約44px） */
+        margin-top: 4px;
+    }
+
+    /* --- 2. OCRスキャナーの設定パネル --- */
+    .ocr-settings-panel {
+        padding: 12px;
+        /* 余白を詰める */
+        gap: 12px;
+    }
+
+    /* --- 3. デバッグパネル（横並びを縦積みに） --- */
+    .ocr-debug-grid {
+        grid-template-columns: 1fr;
+        /* スマホでは横幅が足りないので縦1列にする */
+        gap: 4px;
+    }
+
+    /* --- 4. キャンバス・プレビューの調整 --- */
+    .ocr-process-canvas {
+        max-height: 200px;
+        /* PCの300pxだとスマホの画面を占有しすぎるので少し低くする */
+    }
+
+    /* --- 5. OCRのアクションボタン（やり直す・保存するなど） --- */
+    .ocr-actions {
+        flex-direction: column;
+        /* 横並びから縦積みに変更 */
+        gap: 12px;
+    }
+
+    .ocr-actions>button {
+        height: 44px;
+        /* スマホで押しやすい高さに統一 */
+        font-size: 1rem;
+        /* 文字も少し大きくして視認性を上げる */
+    }
+}

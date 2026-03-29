@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button } from "../../../../shared/ui/button";
+import { Button } from "../../../../shared/ui/button/Button";
 import { useBarcodeScanner } from '../../hooks/useBarcodeScanner';
 import '../../style.css';
 
